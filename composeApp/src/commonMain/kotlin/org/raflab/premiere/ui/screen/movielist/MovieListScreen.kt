@@ -1,0 +1,269 @@
+package org.raflab.premiere.ui.screen.movielist
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import coil3.compose.AsyncImage
+import org.koin.androidx.compose.koinViewModel
+import org.raflab.premiere.data.model.MovieMinDTO
+import org.raflab.premiere.navigation.NavRoutes
+import org.raflab.premiere.ui.screen.movielist.MovieListContract.Event
+import org.raflab.premiere.ui.screen.movielist.MovieListContract.Effect
+import org.raflab.premiere.ui.screen.movielist.MovieListContract.SortOption
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MovieListScreen(navController: NavController) {
+    val viewModel: MovieListViewModel = koinViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is Effect.NavigateToDetails ->
+                    navController.navigate(NavRoutes.MovieDetails().createRoute(effect.movieId))
+                is Effect.NavigateToFilter ->
+                    navController.navigate(NavRoutes.Filter.route)
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("🎬 Premiere", fontWeight = FontWeight.Bold)
+                },
+                actions = {
+                    Badge(
+                        containerColor = if (state.activeFilterCount > 0)
+                            MaterialTheme.colorScheme.error else Color.Transparent
+                    ) {
+                        if (state.activeFilterCount > 0) {
+                            Text("${state.activeFilterCount}")
+                        }
+                    }
+                    Button(
+                        onClick = { viewModel.onEvent(Event.FilterButtonClicked) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        ),
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Icon(Icons.Default.Tune, contentDescription = "Filter")
+                        Spacer(Modifier.width(4.dp))
+                        Text("Filter")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // Sort + count row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                SortPill(
+                    currentSort = state.sortBy,
+                    onSortChanged = { viewModel.onEvent(Event.SortChanged(it)) }
+                )
+                Text(
+                    text = "${state.total} movies",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            when {
+                state.isLoading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                state.error != null -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Something went wrong", style = MaterialTheme.typography.bodyLarge)
+                            Spacer(Modifier.height(8.dp))
+                            Button(onClick = { viewModel.onEvent(Event.RetryClicked) }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+                state.movies.isEmpty() -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No movies found")
+                    }
+                }
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Spacer(Modifier.height(4.dp))
+                        state.movies.forEach { movie ->
+                            MovieListItem(
+                                movie = movie,
+                                onClick = { viewModel.onEvent(Event.MovieClicked(movie.imdbId)) }
+                            )
+                        }
+                        Spacer(Modifier.height(12.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SortPill(
+    currentSort: SortOption,
+    onSortChanged: (SortOption) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        FilterChip(
+            selected = true,
+            onClick = { expanded = true },
+            label = {
+                Text("Sort: ${currentSort.label} ↓")
+            },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        )
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            SortOption.entries.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option.label) },
+                    onClick = {
+                        onSortChanged(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieListItem(
+    movie: MovieMinDTO,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(modifier = Modifier.padding(10.dp)) {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w185${movie.posterPath}",
+                contentDescription = movie.title,
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(110.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = movie.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "${movie.year ?: ""}${if (movie.runtime != null) " · ${movie.runtime} min" else ""}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "${movie.imdbRating ?: "-"}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFC107)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = formatVotes(movie.imdbVotes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    movie.genres.forEach { genre ->
+                        SuggestionChip(
+                            onClick = {},
+                            label = { Text(genre.name, style = MaterialTheme.typography.labelSmall) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun formatVotes(votes: Int?): String {
+    if (votes == null) return ""
+    return when {
+        votes >= 1_000_000 -> "${String.format("%.1f", votes / 1_000_000.0)}M votes"
+        votes >= 1_000 -> "${String.format("%.0f", votes / 1_000.0)}K votes"
+        else -> "$votes votes"
+    }
+}
