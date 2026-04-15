@@ -59,7 +59,7 @@ class MovieListViewModel(
 
     private fun loadMovies() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(screenState = MovieListContract.ScreenState.Loading) }
             try {
                 val filters = _state.value.activeFilters
                 val result = repository.getMovies(
@@ -73,16 +73,16 @@ class MovieListViewModel(
                 )
                 _state.update {
                     it.copy(
-                        isLoading = false,
-                        movies = result.items,
-                        total = result.totalItems
+                        screenState = if (result.items.isEmpty())
+                            MovieListContract.ScreenState.Empty
+                        else
+                            MovieListContract.ScreenState.Success(result.items, result.totalItems)
                     )
                 }
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 println("MovieRepo Error: ${e.message}")
-                e.printStackTrace()
                 _state.update {
-                    it.copy(isLoading = false, error = e.message ?: "Unknown error")
+                    it.copy(screenState = MovieListContract.ScreenState.Error(e.message ?: "Unknown error"))
                 }
             }
         }

@@ -93,23 +93,27 @@ fun MovieListScreen(navController: NavController) {
                     currentSort = state.sortBy,
                     onSortChanged = { viewModel.onEvent(Event.SortChanged(it)) }
                 )
-                Text(
-                    text = "${state.total} movies",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (state.screenState is MovieListContract.ScreenState.Success) {
+                    Text(
+                        text = "${(state.screenState as MovieListContract.ScreenState.Success).total} movies",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            when {
-                state.isLoading -> {
+            when (val screenState = state.screenState) {
+                is MovieListContract.ScreenState.Loading -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
-                state.error != null -> {
+                is MovieListContract.ScreenState.Error -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Something went wrong", style = MaterialTheme.typography.bodyLarge)
+                            Spacer(Modifier.height(8.dp))
+                            Text(screenState.message, style = MaterialTheme.typography.bodySmall)
                             Spacer(Modifier.height(8.dp))
                             Button(onClick = { viewModel.onEvent(Event.RetryClicked) }) {
                                 Text("Retry")
@@ -117,12 +121,12 @@ fun MovieListScreen(navController: NavController) {
                         }
                     }
                 }
-                state.movies.isEmpty() -> {
+                is MovieListContract.ScreenState.Empty -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("No movies found")
                     }
                 }
-                else -> {
+                is MovieListContract.ScreenState.Success -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -131,7 +135,7 @@ fun MovieListScreen(navController: NavController) {
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Spacer(Modifier.height(4.dp))
-                        state.movies.forEach { movie ->
+                        screenState.movies.forEach { movie ->
                             MovieListItem(
                                 movie = movie,
                                 onClick = { viewModel.onEvent(Event.MovieClicked(movie.imdbId)) }

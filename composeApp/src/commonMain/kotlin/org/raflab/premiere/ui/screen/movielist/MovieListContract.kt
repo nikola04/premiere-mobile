@@ -4,15 +4,19 @@ import org.raflab.premiere.data.model.MovieMinDTO
 
 object MovieListContract {
 
+    sealed class ScreenState {
+        data object Loading : ScreenState()
+        data class Success(val movies: List<MovieMinDTO>, val total: Int) : ScreenState()
+        data class Error(val message: String) : ScreenState()
+        data object Empty : ScreenState()
+    }
+
     data class State(
-        val movies: List<MovieMinDTO> = emptyList(),
-        val total: Int = 0,
-        val isLoading: Boolean = false,
-        val error: String? = null,
+        val screenState: ScreenState = ScreenState.Loading,
         val sortBy: SortOption = SortOption.RATING,
         val sortOrder: String = "desc",
         val activeFilters: FilterParams = FilterParams(),
-        val activeFilterCount: Int = 0
+        val activeFilterCount: Int = 0,
     )
 
     sealed class Event {
