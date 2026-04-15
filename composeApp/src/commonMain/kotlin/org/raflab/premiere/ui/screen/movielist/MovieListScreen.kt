@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import org.raflab.premiere.data.model.MovieMinDTO
 import org.raflab.premiere.navigation.NavRoutes
 import org.raflab.premiere.ui.screen.movielist.MovieListContract.Event
@@ -262,8 +262,12 @@ fun MovieListItem(
 private fun formatVotes(votes: Int?): String {
     if (votes == null) return ""
     return when {
-        votes >= 1_000_000 -> "${String.format("%.1f", votes / 1_000_000.0)}M votes"
-        votes >= 1_000 -> "${String.format("%.0f", votes / 1_000.0)}K votes"
+        votes >= 1_000_000 -> {
+            val millions = votes / 1_000_000.0
+            val rounded = (millions * 10).toInt() / 10.0
+            "${rounded}M votes"
+        }
+        votes >= 1_000 -> "${votes / 1000}K votes"
         else -> "$votes votes"
     }
 }

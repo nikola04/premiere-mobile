@@ -1,6 +1,5 @@
 package org.raflab.premiere.ui.screen.movielist
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
@@ -79,8 +78,9 @@ class MovieListViewModel(
                         total = result.totalItems
                     )
                 }
-            } catch (e: Exception) {
-                Log.e("API_ERROR", "Movie list fetch error: ${e.localizedMessage}")
+            } catch (e: Exception){
+                println("MovieRepo Error: ${e.message}")
+                e.printStackTrace()
                 _state.update {
                     it.copy(isLoading = false, error = e.message ?: "Unknown error")
                 }

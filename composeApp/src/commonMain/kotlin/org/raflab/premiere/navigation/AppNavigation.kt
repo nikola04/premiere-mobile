@@ -28,7 +28,7 @@ fun AppNavigation() {
             route = NavRoutes.MovieDetails().route,
             arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getInt("id") ?: return@composable
+            // val id = backStackEntry.arguments?.get("id") ?: return@composable
             // TODO: MovieDetailsScreen(navController, id)
         }
     }
