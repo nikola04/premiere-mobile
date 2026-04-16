@@ -50,7 +50,7 @@ fun MovieListScreen(navController: NavController) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text("🎬 Premiere", fontWeight = FontWeight.Bold)
+                    Text("Premiere", fontWeight = FontWeight.Black)
                 },
                 actions = {
                     Badge(

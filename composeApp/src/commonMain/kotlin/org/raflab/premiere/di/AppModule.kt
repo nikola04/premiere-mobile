@@ -11,6 +11,7 @@ import org.raflab.premiere.data.repository.MovieRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.raflab.premiere.data.api.createMovieAPI
+import org.raflab.premiere.ui.screen.moviedetails.MovieDetailsViewModel
 import org.raflab.premiere.ui.screen.movielist.MovieListViewModel
 
 val appModule = module {
@@ -37,4 +38,5 @@ val appModule = module {
 
     singleOf(::MovieRepository)
     viewModelOf(::MovieListViewModel)
+    viewModelOf(::MovieDetailsViewModel)
 }

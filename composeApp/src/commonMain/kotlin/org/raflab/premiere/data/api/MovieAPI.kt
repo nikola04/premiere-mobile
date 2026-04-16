@@ -19,8 +19,8 @@ interface MovieAPI {
         @Query("min_rating") minRating: Float? = null
     ): MovieListResponse
 
-    /*@GET("movies/{id}")
-    suspend fun getMovieDetails(@Path("id") id: Int): MovieDTO*/
+    @GET("movies/{id}")
+    suspend fun getMovieDetails(@Path("id") id: String): MovieDTO
 
     @GET("movies/{id}/cast")
     suspend fun getCast(

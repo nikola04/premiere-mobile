@@ -16,7 +16,7 @@ class MovieRepository(private val api: MovieAPI) {
         minRating: Float? = null
     ): MovieListResponse = api.getMovies(pageSize, sortBy, sortOrder, genreId, query, minYear, maxYear, minRating)
 
-    /*suspend fun getMovieDetails(id: Int): MovieDTO = api.getMovieDetails(id)*/
+    suspend fun getMovieDetails(id: String): MovieDTO = api.getMovieDetails(id)
 
     suspend fun getCast(id: Int): CastResponse = api.getCast(id)
 
