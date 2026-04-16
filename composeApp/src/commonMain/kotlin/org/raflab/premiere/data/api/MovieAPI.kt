@@ -24,19 +24,19 @@ interface MovieAPI {
 
     @GET("movies/{id}/cast")
     suspend fun getCast(
-        @Path("id") id: Int,
+        @Path("id") id: String,
         @Query("page_size") pageSize: Int = 10
     ): CastResponse
 
     @GET("movies/{id}/images")
     suspend fun getImages(
-        @Path("id") id: Int,
+        @Path("id") id: String,
         @Query("type") type: String = "backdrop"
     ): ImageResponse
 
     @GET("movies/{id}/videos")
     suspend fun getVideos(
-        @Path("id") id: Int,
+        @Path("id") id: String,
         @Query("type") type: String = "Trailer"
     ): VideoResponse
 

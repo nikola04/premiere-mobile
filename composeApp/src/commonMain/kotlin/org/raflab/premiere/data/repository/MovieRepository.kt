@@ -18,11 +18,11 @@ class MovieRepository(private val api: MovieAPI) {
 
     suspend fun getMovieDetails(id: String): MovieDTO = api.getMovieDetails(id)
 
-    suspend fun getCast(id: Int): CastResponse = api.getCast(id)
+    suspend fun getCast(id: String): CastResponse = api.getCast(id)
 
-    suspend fun getImages(id: Int): ImageResponse = api.getImages(id)
+    suspend fun getImages(id: String): ImageResponse = api.getImages(id)
 
-    suspend fun getVideos(id: Int): VideoResponse = api.getVideos(id)
+    suspend fun getVideos(id: String): VideoResponse = api.getVideos(id)
 
     suspend fun getGenres(): GenreListResponse = api.getGenres()
 

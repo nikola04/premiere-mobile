@@ -1,11 +1,12 @@
 package org.raflab.premiere.ui.screen.moviedetails
 
+import org.raflab.premiere.data.model.CastMemberDTO
 import org.raflab.premiere.data.model.MovieDTO
 
 object MovieDetailsContract {
     sealed class ScreenState {
         data object Loading : ScreenState()
-        data class Success(val movie: MovieDTO): ScreenState()
+        data class Success(val movie: MovieDTO, val cast: List<CastMemberDTO> = emptyList()): ScreenState()
         data class Error(val message: String): ScreenState()
     }
 

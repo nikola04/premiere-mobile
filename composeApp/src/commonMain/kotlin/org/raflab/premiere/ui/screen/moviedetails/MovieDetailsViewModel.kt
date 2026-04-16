@@ -13,7 +13,7 @@ import org.raflab.premiere.data.repository.MovieRepository
 
 class MovieDetailsViewModel(
     private val repository: MovieRepository,
-    private val savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _state = MutableStateFlow(MovieDetailsContract.State())
     val state = _state.asStateFlow()
@@ -54,7 +54,13 @@ class MovieDetailsViewModel(
             _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Loading) }
             try {
                 val movie = repository.getMovieDetails(movieId)
-                _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Success(movie)) }
+                val cast = try {
+                    repository.getCast(movieId).items
+                } catch (e: Exception) {
+                    println(e)
+                    emptyList()
+                }
+                _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Success(movie, cast)) }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(screenState = MovieDetailsContract.ScreenState.Error(e.message ?: "unknown error"))

@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
@@ -81,7 +83,6 @@ fun MovieListScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Sort + count row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,11 +162,11 @@ fun SortPill(
             selected = true,
             onClick = { expanded = true },
             label = {
-                Text("Sort: ${currentSort.label} ↓")
+                Text("Sort: ${currentSort.label}")
             },
             trailingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Star,
+                    imageVector = if (currentSort == SortOption.TITLE) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp)
                 )
@@ -196,7 +197,7 @@ fun MovieListItem(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
         Row(modifier = Modifier.padding(10.dp)) {
@@ -246,7 +247,7 @@ fun MovieListItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -254,6 +255,9 @@ fun MovieListItem(
                     movie.genres.forEach { genre ->
                         SuggestionChip(
                             onClick = {},
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            ),
                             label = { Text(genre.name, style = MaterialTheme.typography.labelSmall) }
                         )
                     }

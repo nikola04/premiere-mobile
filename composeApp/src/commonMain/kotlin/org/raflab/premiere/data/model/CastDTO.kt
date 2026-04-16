@@ -1,17 +1,20 @@
 package org.raflab.premiere.data.model
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class CastResponse(
-    val cast: List<CastMemberDTO>
+    val items: List<CastMemberDTO>,
+    val totalItems: Int,
+    val page: Int,
+    val totalPages: Int,
 )
 
 @Serializable
 data class CastMemberDTO(
-    val id: Int,
+    val imdbId: String,
     val name: String,
-    val character: String? = null,
-    @SerialName("profile_path") val profilePath: String? = null
+    val professions: String? = null,
+    val profilePath: String? = null,
+    val department: String? = null
 )
