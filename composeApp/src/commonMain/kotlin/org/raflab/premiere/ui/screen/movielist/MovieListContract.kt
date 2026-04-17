@@ -1,6 +1,7 @@
 package org.raflab.premiere.ui.screen.movielist
 
 import org.raflab.premiere.data.model.MovieMinDTO
+import org.raflab.premiere.ui.state.FilterParams
 
 object MovieListContract {
 
@@ -14,7 +15,6 @@ object MovieListContract {
     data class State(
         val screenState: ScreenState = ScreenState.Loading,
         val sortBy: SortOption = SortOption.RATING,
-        val sortOrder: String = "desc",
         val activeFilters: FilterParams = FilterParams(),
         val activeFilterCount: Int = 0,
     )
@@ -33,20 +33,15 @@ object MovieListContract {
         data object NavigateToFilter : Effect()
     }
 
-    data class FilterParams(
-        val query: String? = null,
-        val genreId: Int? = null,
-        val minYear: Int? = null,
-        val maxYear: Int? = null,
-        val minRating: Float? = null
-    ) {
-        fun activeCount(): Int = listOfNotNull(query, genreId, minYear, maxYear, minRating).size
+    enum class SortOption(val apiValue: String, val label: String, var order: SortOrder) {
+        RATING("imdb_rating", "Rating", SortOrder.DESC),
+        YEAR("year", "Year", SortOrder.DESC),
+        TITLE("title", "Title", SortOrder.ASC),
+        POPULARITY("popularity", "Popularity", SortOrder.DESC)
     }
 
-    enum class SortOption(val apiValue: String, val label: String) {
-        RATING("imdb_rating", "Rating"),
-        YEAR("year", "Year"),
-        TITLE("title", "Title"),
-        POPULARITY("popularity", "Popularity")
+    enum class SortOrder(val value: String) {
+        DESC("desc"),
+        ASC("ASC")
     }
 }

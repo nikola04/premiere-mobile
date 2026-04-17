@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.raflab.premiere.ui.screen.moviedetails.MovieDetailsScreen
 import org.raflab.premiere.ui.screen.movielist.MovieListScreen
+import org.raflab.premiere.ui.screen.movielistfilter.MovieListFiltersScreen
 
 @Composable
 fun AppNavigation() {
@@ -19,8 +20,8 @@ fun AppNavigation() {
             MovieListScreen(navController)
         }
 
-        composable(NavRoutes.Filter.route) {
-            // TODO: FilterScreen(navController)
+        composable(NavRoutes.MovieListFilters.route) {
+            MovieListFiltersScreen(navController)
         }
 
         composable(route = NavRoutes.MovieDetails().route) {

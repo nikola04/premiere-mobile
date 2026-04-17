@@ -1,6 +1,7 @@
 package org.raflab.premiere.ui.screen.moviedetails
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +27,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,16 +60,23 @@ import org.raflab.premiere.data.model.CastMemberDTO
 import org.raflab.premiere.data.model.MovieDTO
 import kotlin.math.round
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailsScreen(navController: NavController) {
     val viewModel: MovieDetailsViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is MovieDetailsContract.Effect.NavigateBack -> navController.popBackStack()
+                is MovieDetailsContract.Effect.NavigateBack -> {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    }
+                }
+                is MovieDetailsContract.Effect.OpenYoutube -> {
+                    uriHandler.openUri("https://www.youtube.com/watch?v=${effect.id}")
+                }
             }
         }
     }
@@ -92,6 +100,8 @@ fun MovieDetailsScreen(navController: NavController) {
                 }
                 is MovieDetailsContract.ScreenState.Success -> {
                     val movie = screenState.movie
+                    val images = screenState.images
+                    val trailer = screenState.trailer
                     val scrollState = rememberScrollState()
                     Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
                         // ----- Background/Banner -----
@@ -109,6 +119,27 @@ fun MovieDetailsScreen(navController: NavController) {
                                 )))
                             }else {
                                 Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant))
+                            }
+                            if (trailer != null) {
+                                IconButton(
+                                    onClick = {
+                                        viewModel.onEvent(MovieDetailsContract.Event.OpenYoutube(trailer.key))
+                                    },
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .align(Alignment.Center)
+                                        .background(
+                                            color = Color.Black.copy(alpha = 0.3f),
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.PlayArrow,
+                                        contentDescription = "Play",
+                                        modifier = Modifier.size(48.dp),
+                                        tint = Color.White
+                                    )
+                                }
                             }
                         }
                         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).offset(y = (-40).dp),
@@ -230,6 +261,25 @@ fun MovieDetailsScreen(navController: NavController) {
 
                                 SectionTitle("DETAILS")
                                 DetailsGrid(movie)
+
+                                if (images.isNotEmpty()) {
+                                    SectionTitle("IMAGES")
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                                        images.forEach { image ->
+                                            Card(modifier = Modifier.height(100.dp),
+                                                shape = RoundedCornerShape(8.dp),
+                                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
+                                                AsyncImage(
+                                                    model = "https://image.tmdb.org/t/p/w300${image.filePath}}",
+                                                    contentDescription = null,
+                                                    contentScale = ContentScale.Crop,
+                                                    modifier = Modifier.fillMaxSize()
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
 
                                 if (screenState.cast.isNotEmpty()) {
                                     SectionTitle("CAST")
@@ -354,16 +404,6 @@ private fun CastRow(cast: List<CastMemberDTO>) {
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center
                 )
-                /* if (member. != null) {
-                    Text(
-                        text = member.character,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }*/
             }
         }
     }

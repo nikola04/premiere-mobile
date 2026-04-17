@@ -13,6 +13,8 @@ import org.koin.core.module.dsl.viewModelOf
 import org.raflab.premiere.data.api.createMovieAPI
 import org.raflab.premiere.ui.screen.moviedetails.MovieDetailsViewModel
 import org.raflab.premiere.ui.screen.movielist.MovieListViewModel
+import org.raflab.premiere.ui.screen.movielistfilter.MovieListFiltersViewModel
+import org.raflab.premiere.ui.state.FilterManager
 
 val appModule = module {
 
@@ -36,7 +38,10 @@ val appModule = module {
 
     single<MovieAPI> { get<Ktorfit>().createMovieAPI() }
 
+    singleOf(::FilterManager)
     singleOf(::MovieRepository)
+
     viewModelOf(::MovieListViewModel)
+    viewModelOf(::MovieListFiltersViewModel)
     viewModelOf(::MovieDetailsViewModel)
 }

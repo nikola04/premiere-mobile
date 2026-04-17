@@ -30,6 +30,7 @@ import org.raflab.premiere.navigation.NavRoutes
 import org.raflab.premiere.ui.screen.movielist.MovieListContract.Event
 import org.raflab.premiere.ui.screen.movielist.MovieListContract.Effect
 import org.raflab.premiere.ui.screen.movielist.MovieListContract.SortOption
+import org.raflab.premiere.ui.screen.movielist.MovieListContract.SortOrder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +44,7 @@ fun MovieListScreen(navController: NavController) {
                 is Effect.NavigateToDetails ->
                     navController.navigate(NavRoutes.MovieDetails().createRoute(effect.movieId))
                 is Effect.NavigateToFilter ->
-                    navController.navigate(NavRoutes.Filter.route)
+                    navController.navigate(NavRoutes.MovieListFilters.route)
             }
         }
     }
@@ -55,24 +56,26 @@ fun MovieListScreen(navController: NavController) {
                     Text("Premiere", fontWeight = FontWeight.Black)
                 },
                 actions = {
-                    Badge(
-                        containerColor = if (state.activeFilterCount > 0)
-                            MaterialTheme.colorScheme.error else Color.Transparent
-                    ) {
-                        if (state.activeFilterCount > 0) {
-                            Text("${state.activeFilterCount}")
-                        }
-                    }
                     Button(
                         onClick = { viewModel.onEvent(Event.FilterButtonClicked) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(50)
                     ) {
                         Icon(Icons.Default.Tune, contentDescription = "Filter")
                         Spacer(Modifier.width(4.dp))
                         Text("Filter")
+                    }
+                    Badge(
+                        containerColor = if (state.activeFilterCount > 0)
+                            MaterialTheme.colorScheme.error else Color.Transparent,
+                        modifier = Modifier.offset(x = (-12).dp, y = (-10).dp),
+                    ) {
+                        if (state.activeFilterCount > 0) {
+                            Text("${state.activeFilterCount}",
+                                fontWeight = FontWeight.ExtraBold)
+                        }
                     }
                 }
             )
@@ -166,7 +169,7 @@ fun SortPill(
             },
             trailingIcon = {
                 Icon(
-                    imageVector = if (currentSort == SortOption.TITLE) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    imageVector = if (currentSort.order == SortOrder.ASC) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp)
                 )
@@ -256,7 +259,8 @@ fun MovieListItem(
                         SuggestionChip(
                             onClick = {},
                             colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                containerColor = MaterialTheme.colorScheme.background,
+                                labelColor = MaterialTheme.colorScheme.onBackground
                             ),
                             label = { Text(genre.name, style = MaterialTheme.typography.labelSmall) }
                         )

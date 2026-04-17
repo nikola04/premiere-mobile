@@ -7,8 +7,3 @@ data class GenreDTO(
     val id: Int,
     val name: String
 )
-
-@Serializable
-data class GenreListResponse(
-    val genres: List<GenreDTO>
-)

@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ConfigDTO(
-    @SerialName("image_base_url") val imageBaseUrl: String,
-    val sizes: List<String>
+    @SerialName("key")
+    val key: String,
+    @SerialName("value")
+    val value: String
 )

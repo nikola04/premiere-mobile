@@ -81,7 +81,7 @@ private fun formatVotes(votes: Int): String = when {
     }
     votes >= 1_000 -> {
         val f = votes / 1_000f
-        "${round(f * 10f) / 10f}M"
+        "${round(f * 10f) / 10f}K"
     }
     else -> votes.toString()
 }

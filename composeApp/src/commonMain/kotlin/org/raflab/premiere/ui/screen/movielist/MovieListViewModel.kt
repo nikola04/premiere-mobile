@@ -12,13 +12,27 @@ import org.raflab.premiere.data.repository.MovieRepository
 import org.raflab.premiere.ui.screen.movielist.MovieListContract.State
 import org.raflab.premiere.ui.screen.movielist.MovieListContract.Event
 import org.raflab.premiere.ui.screen.movielist.MovieListContract.Effect
+import org.raflab.premiere.ui.state.FilterManager
 
 class MovieListViewModel(
-    private val repository: MovieRepository
+    private val repository: MovieRepository,
+    private val filterManager: FilterManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            filterManager.activeFilters.collect { filters ->
+                _state.update {
+                    it.copy(activeFilters = filters, activeFilterCount = filters.activeCount())
+                }
+
+                loadMovies()
+            }
+        }
+    }
 
     private val _effect = Channel<Effect>()
     val effect = _effect.receiveAsFlow()
@@ -64,7 +78,7 @@ class MovieListViewModel(
                 val filters = _state.value.activeFilters
                 val result = repository.getMovies(
                     sortBy = _state.value.sortBy.apiValue,
-                    sortOrder = _state.value.sortOrder,
+                    sortOrder = _state.value.sortBy.order.value,
                     genreId = filters.genreId,
                     query = filters.query,
                     minYear = filters.minYear,

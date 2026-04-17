@@ -31,17 +31,17 @@ interface MovieAPI {
     @GET("movies/{id}/images")
     suspend fun getImages(
         @Path("id") id: String,
-        @Query("type") type: String = "backdrop"
-    ): ImageResponse
+        @Query("type") type: String = "backdrop",
+        ): ImageResponse
 
     @GET("movies/{id}/videos")
     suspend fun getVideos(
         @Path("id") id: String,
         @Query("type") type: String = "Trailer"
-    ): VideoResponse
+    ): List<VideoDTO>
 
     @GET("genres")
-    suspend fun getGenres(): GenreListResponse
+    suspend fun getGenres(): List<GenreDTO>
 
     @GET("config")
     suspend fun getConfig(): ConfigDTO

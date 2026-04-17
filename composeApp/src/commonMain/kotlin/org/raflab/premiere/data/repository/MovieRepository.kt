@@ -22,9 +22,9 @@ class MovieRepository(private val api: MovieAPI) {
 
     suspend fun getImages(id: String): ImageResponse = api.getImages(id)
 
-    suspend fun getVideos(id: String): VideoResponse = api.getVideos(id)
+    suspend fun getVideos(id: String, type: String = "Trailer"): List<VideoDTO> = api.getVideos(id, type)
 
-    suspend fun getGenres(): GenreListResponse = api.getGenres()
+    suspend fun getGenres(): List<GenreDTO> = api.getGenres()
 
     suspend fun getConfig(): ConfigDTO = api.getConfig()
 }

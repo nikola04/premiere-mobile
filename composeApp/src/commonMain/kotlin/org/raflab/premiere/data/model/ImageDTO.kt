@@ -1,14 +1,19 @@
 package org.raflab.premiere.data.model
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ImageResponse(
-    val images: List<ImageDTO>
+    val backdrops: List<ImageDTO> = emptyList(),
+    val posters: List<ImageDTO> = emptyList(),
+    val logos: List<ImageDTO> = emptyList(),
 )
 
 @Serializable
 data class ImageDTO(
-    @SerialName("file_path") val filePath: String
+    val filePath: String,
+    val width: Int? = null,
+    val height: Int? = null,
+    val voteAverage: Float? = null,
+    val language: String? = null,
 )
