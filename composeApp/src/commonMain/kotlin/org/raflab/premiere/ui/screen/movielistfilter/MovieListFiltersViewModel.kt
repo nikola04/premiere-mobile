@@ -13,6 +13,7 @@ import org.raflab.premiere.ui.state.FilterManager
 import org.raflab.premiere.ui.screen.movielistfilter.MovieListFiltersContract.State
 import org.raflab.premiere.ui.screen.movielistfilter.MovieListFiltersContract.Event
 import org.raflab.premiere.ui.screen.movielistfilter.MovieListFiltersContract.Effect
+import org.raflab.premiere.ui.state.FilterParams
 
 class MovieListFiltersViewModel(
     private var repository: MovieRepository,
@@ -37,11 +38,8 @@ class MovieListFiltersViewModel(
                 }
             }
             is Event.ClearFiltersClicked -> {
-                _state.update { it.copy(activeFilters = state.value.activeFilters.copy()) }
-                viewModelScope.launch {
-                    filterManager.clear()
-                    _effect.send(Effect.ApplyFilters)
-                }
+                filterManager.clear()
+                _state.update { it.copy(activeFilters = FilterParams()) }
             }
             is Event.RetryClicked -> {
                 loadGenres()
